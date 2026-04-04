@@ -381,8 +381,8 @@ async def update_issue_status(issue_id: str, req: UpdateStatusRequest, current_u
 
 @api_router.get("/stray")
 async def get_stray_reports(current_user=Depends(get_current_user)):
-    query = {} if current_user["role"] == "warden" else {"student_id": current_user["id"]}
-    return await db.stray_reports.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
+    # All students see all reports (community awareness — avoids double-reporting)
+    return await db.stray_reports.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
 
 @api_router.post("/stray")
 async def create_stray_report(req: CreateStrayReportRequest, current_user=Depends(get_current_user)):
