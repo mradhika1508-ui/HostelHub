@@ -7,8 +7,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { timeAgo } from "../../utils/timeAgo";
 import { toast } from "sonner";
 import {
-  Droplets, Zap, Wifi, Lock, Wind, Sparkles, Bath, Square,
-  ImagePlus, CheckCircle, AlertCircle, Clock, Calendar, ChevronRight, Plus
+  Wrench, Droplets, Zap, Wifi, Lock, Wind, Sparkles, Bath, Square,
+  ImagePlus, CheckCircle, AlertCircle, Clock, ChevronRight, Plus
 } from "lucide-react";
 
 const CATEGORIES = [
