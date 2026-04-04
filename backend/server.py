@@ -122,7 +122,6 @@ class CreateStrayReportRequest(BaseModel):
     photo_url: str  # mandatory
     location_meta: Optional[str] = None
 
-
 # ─── Auth Utilities ──────────────────────────────────────────────────────────
 
 def create_access_token(data: dict) -> str:
@@ -149,7 +148,6 @@ def require_warden(current_user=Depends(get_current_user)):
     if current_user.get('role') != 'warden':
         raise HTTPException(status_code=403, detail="Warden access required")
     return current_user
-
 
 # ─── Auth Routes ─────────────────────────────────────────────────────────────
 
