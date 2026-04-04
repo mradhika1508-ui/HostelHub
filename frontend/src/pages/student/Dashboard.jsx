@@ -5,7 +5,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import api from "../../api/axios";
 import { timeAgo } from "../../utils/timeAgo";
 import { StatusBadge } from "../../components/StatusTracker";
-import { Wrench, Search, UtensilsCrossed, AlertCircle, ArrowRight, TrendingUp } from "lucide-react";
+import { Wrench, Search, UtensilsCrossed, AlertCircle, ArrowRight, TrendingUp, PawPrint } from "lucide-react";
 
 const CircularRing = ({ value }) => {
   const radius = 40;

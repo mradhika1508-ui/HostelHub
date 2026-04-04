@@ -104,6 +104,12 @@ class CreateIssueRequest(BaseModel):
     urgency: str
     anonymous: bool = True
 
+class CreateStrayReportRequest(BaseModel):
+    issue_type: str  # Injured, Aggressive, Hungry or Malnourished, Pregnant, Sick, Lost, Other
+    description: str = ""
+    photo_url: str  # mandatory
+    location_meta: Optional[str] = None
+
 
 # ─── Auth Utilities ──────────────────────────────────────────────────────────
 
@@ -371,6 +377,37 @@ async def update_issue_status(issue_id: str, req: UpdateStatusRequest, current_u
     return {"message": "Updated"}
 
 
+# ─── Stray Animal Reports ─────────────────────────────────────────────────────
+
+@api_router.get("/stray")
+async def get_stray_reports(current_user=Depends(get_current_user)):
+    query = {} if current_user["role"] == "warden" else {"student_id": current_user["id"]}
+    return await db.stray_reports.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
+
+@api_router.post("/stray")
+async def create_stray_report(req: CreateStrayReportRequest, current_user=Depends(get_current_user)):
+    report = {
+        "id": gen_id(), "ticket_number": gen_ticket_num("STRAY"),
+        "student_id": current_user["id"], "student_name": current_user["name"],
+        "floor_number": current_user.get("floor_number", ""),
+        "issue_type": req.issue_type, "description": req.description[:150],
+        "photo_url": req.photo_url, "location_meta": req.location_meta,
+        "status": "reported", "warden_notes": "", "created_at": now_iso()
+    }
+    await db.stray_reports.insert_one({**report, "_id": report["id"]})
+    return report
+
+@api_router.patch("/stray/{report_id}/status")
+async def update_stray_status(report_id: str, req: UpdateStatusRequest, current_user=Depends(require_warden)):
+    result = await db.stray_reports.update_one(
+        {"id": report_id},
+        {"$set": {"status": req.status, "warden_notes": req.warden_notes}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return {"message": "Updated"}
+
+
 # ─── Dashboard Overview ───────────────────────────────────────────────────────
 
 @api_router.get("/dashboard/overview")
@@ -460,7 +497,7 @@ async def get_analytics(current_user=Depends(require_warden)):
 
 @api_router.post("/seed")
 async def seed():
-    for col in ["users", "maintenance", "lost_found", "mess_menu", "mess_ratings", "mess_complaints", "other_issues"]:
+    for col in ["users", "maintenance", "lost_found", "mess_menu", "mess_ratings", "mess_complaints", "other_issues", "stray_reports"]:
         await db[col].delete_many({})
 
     users = [
@@ -628,10 +665,28 @@ async def seed():
     for oi in issues:
         await db.other_issues.insert_one({**oi, "_id": oi["id"]})
 
+    stray_reports = [
+        {"id": "sr1", "ticket_number": "STRAY-202502-P1Q2", "student_id": "student1",
+         "student_name": "Priya Sharma", "floor_number": "2", "issue_type": "Injured",
+         "description": "Found a dog near the hostel gate with a visible wound on its leg.",
+         "photo_url": "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80",
+         "location_meta": "12.96929, 79.15529", "status": "being_handled", "warden_notes": "NGO contacted",
+         "created_at": days_ago_iso(1)},
+        {"id": "sr2", "ticket_number": "STRAY-202502-R3S4", "student_id": "student3",
+         "student_name": "Meera Singh", "floor_number": "1", "issue_type": "Hungry or Malnourished",
+         "description": "Stray cat near mess back door looks very thin and weak.",
+         "photo_url": "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=400&q=80",
+         "location_meta": "12.96915, 79.15541", "status": "reported", "warden_notes": "",
+         "created_at": days_ago_iso(hours=4)},
+    ]
+    for sr in stray_reports:
+        await db.stray_reports.insert_one({**sr, "_id": sr["id"]})
+
     return {"message": "Database seeded successfully",
             "counts": {"users": 4, "maintenance": len(maintenance), "lost_found": len(lost_found),
                        "mess_menus": len(menus_data), "mess_ratings": len(ratings_seed),
-                       "mess_complaints": len(complaints), "other_issues": len(issues)}}
+                       "mess_complaints": len(complaints), "other_issues": len(issues),
+                       "stray_reports": len(stray_reports)}}
 
 
 # ─── App Setup ────────────────────────────────────────────────────────────────

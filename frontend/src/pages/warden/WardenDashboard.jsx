@@ -6,7 +6,7 @@ import { timeAgo } from "../../utils/timeAgo";
 import { toast } from "sonner";
 import {
   Wrench, Search, UtensilsCrossed, AlertCircle, TrendingUp,
-  X, ChevronRight, Check, BarChart2, Star, Package
+  X, ChevronRight, Check, BarChart2, Star, Package, PawPrint, MapPin, Clock
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -578,12 +578,140 @@ const AnalyticsTab = () => {
 
 // ─── Main Warden Dashboard ────────────────────────────────────────────────────
 
+const STRAY_STATUSES = ["reported", "being_handled", "resolved"];
+const STRAY_STATUS_LABELS = { reported: "Reported", being_handled: "Being Handled", resolved: "Resolved" };
+const STRAY_STATUS_STYLES = {
+  reported: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  being_handled: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  resolved: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+};
+const ISSUE_TYPE_EMOJI = {
+  "Injured": "🩹", "Aggressive": "⚠️", "Hungry or Malnourished": "🍖",
+  "Pregnant": "🐾", "Sick": "🤒", "Lost": "🔍", "Other": "📋",
+};
+
+const StrayAnimalsTab = () => {
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    api.get("/stray").then((r) => setReports(r.data)).finally(() => setLoading(false));
+  }, []);
+
+  const updateStatus = async (id, status) => {
+    try {
+      await api.patch(`/stray/${id}/status`, { status, warden_notes: notes });
+      setReports((rs) => rs.map((r) => r.id === id ? { ...r, status, warden_notes: notes } : r));
+      setSelected((s) => s ? { ...s, status, warden_notes: notes } : null);
+      toast.success("Status updated!");
+    } catch { toast.error("Failed to update"); }
+  };
+
+  return (
+    <div className="flex gap-6">
+      <div className={`flex-1 min-w-0 ${selected ? "hidden lg:block" : ""}`}>
+        {loading ? (
+          <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" /></div>
+        ) : reports.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            <PawPrint className="w-10 h-10 mx-auto mb-2 opacity-20" />
+            <p>No stray animal reports</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {reports.map((r) => (
+              <div key={r.id} data-testid={`warden-stray-${r.id}`}
+                onClick={() => { setSelected(r); setNotes(r.warden_notes || ""); }}
+                className={`card-hover bg-white dark:bg-[#23233E] rounded-2xl border overflow-hidden cursor-pointer transition-all ${
+                  selected?.id === r.id ? "border-[#1D9E75]" : "border-gray-100 dark:border-[#313155]"
+                }`}>
+                <div className="h-40 bg-gray-100 dark:bg-[#1a1a2e] relative overflow-hidden">
+                  {r.photo_url ? (
+                    <img src={r.photo_url} alt="Stray" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <PawPrint className="w-10 h-10 text-gray-300" />
+                    </div>
+                  )}
+                  <span className="absolute top-2 left-2 bg-white/90 dark:bg-black/60 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {ISSUE_TYPE_EMOJI[r.issue_type]} {r.issue_type}
+                  </span>
+                </div>
+                <div className="p-4">
+                  {r.description && <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2 mb-2">{r.description}</p>}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STRAY_STATUS_STYLES[r.status]}`}>
+                      {STRAY_STATUS_LABELS[r.status]}
+                    </span>
+                    <span className="text-xs text-gray-400">{timeAgo(r.created_at)}</span>
+                  </div>
+                  <p className="text-xs text-gray-400">Floor {r.floor_number} · {r.student_name}</p>
+                  {r.location_meta && (
+                    <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                      <MapPin className="w-3 h-3" /> {r.location_meta}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Side panel */}
+      {selected && (
+        <div className="w-full lg:w-80 bg-white dark:bg-[#23233E] rounded-2xl border border-gray-100 dark:border-[#313155] p-5 flex-shrink-0 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-gray-900 dark:text-white font-[Outfit]">Report Details</h3>
+            <button onClick={() => setSelected(null)}><X className="w-5 h-5 text-gray-400" /></button>
+          </div>
+          <div className="space-y-3 text-sm">
+            {selected.photo_url && (
+              <img src={selected.photo_url} alt="Stray" className="w-full h-40 object-cover rounded-xl" />
+            )}
+            <div><p className="text-gray-400 text-xs">Ticket</p><p className="font-mono font-bold text-[#1D9E75]">{selected.ticket_number}</p></div>
+            <div><p className="text-gray-400 text-xs">Reported by</p><p className="font-medium dark:text-white">{selected.student_name} · Floor {selected.floor_number}</p></div>
+            <div><p className="text-gray-400 text-xs">Issue Type</p><p className="font-medium dark:text-white">{ISSUE_TYPE_EMOJI[selected.issue_type]} {selected.issue_type}</p></div>
+            {selected.description && <div><p className="text-gray-400 text-xs">Description</p><p className="dark:text-gray-300 leading-relaxed">{selected.description}</p></div>}
+            {selected.location_meta && (
+              <div className="flex items-center gap-1 text-xs text-gray-400">
+                <MapPin className="w-3 h-3" /> {selected.location_meta}
+              </div>
+            )}
+            <div className="pt-3 border-t dark:border-[#313155]">
+              <p className="text-xs font-bold text-gray-400 uppercase mb-2">Update Status</p>
+              <select value={selected.status}
+                onChange={(e) => setSelected((r) => ({ ...r, status: e.target.value }))}
+                className="w-full px-3 py-1.5 border border-gray-200 dark:border-[#313155] rounded-xl bg-white dark:bg-[#1a1a2e] text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/50">
+                {STRAY_STATUSES.map((s) => <option key={s} value={s}>{STRAY_STATUS_LABELS[s]}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Warden Notes</label>
+              <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)}
+                placeholder="e.g. NGO contacted, animal removed..."
+                className="w-full px-3 py-2 border border-gray-200 dark:border-[#313155] rounded-xl bg-white dark:bg-[#1a1a2e]/50 text-gray-900 dark:text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/50" />
+            </div>
+            <button onClick={() => updateStatus(selected.id, selected.status)}
+              className="w-full py-2.5 bg-[#1D9E75] text-white rounded-xl text-sm font-semibold hover:bg-[#15825E] transition-colors">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const TABS = [
   { id: "overview", label: "Overview", icon: BarChart2 },
   { id: "maintenance", label: "Maintenance", icon: Wrench },
   { id: "lostfound", label: "Lost & Found", icon: Search },
   { id: "mess", label: "Mess", icon: UtensilsCrossed },
   { id: "issues", label: "Other Issues", icon: AlertCircle },
+  { id: "stray", label: "Stray Animals", icon: PawPrint },
   { id: "analytics", label: "Analytics", icon: TrendingUp },
 ];
 
@@ -627,6 +755,7 @@ const WardenDashboard = () => {
       {activeTab === "lostfound" && <LostFoundTab />}
       {activeTab === "mess" && <MessTab />}
       {activeTab === "issues" && <OtherIssuesTab />}
+      {activeTab === "stray" && <StrayAnimalsTab />}
       {activeTab === "analytics" && <AnalyticsTab />}
     </Layout>
   );

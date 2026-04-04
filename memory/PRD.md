@@ -64,7 +64,19 @@ A full-stack hostel management system for VIT Girls' Hostel with Google OAuth re
 - GET /api/analytics, GET /api/dashboard/overview, GET /api/health-score
 - POST /api/seed
 
-## Prioritized Backlog
+### Stray Animal Reports (added 2026-04-04)
+- Student page `/stray` with red/amber warning banner at top
+- Mandatory photo upload with auto geotag capture (if browser permission granted)
+- 7 issue types: Injured / Aggressive / Hungry or Malnourished / Pregnant / Sick / Lost / Other
+- 150-char description (enforced on backend)
+- Report card grid showing photo, issue type badge, status, timestamp, location
+- Warden Dashboard — new "Stray Animals" tab (7th tab)
+  - Card grid of all reports with photo thumbnail, issue type, floor, student name
+  - Side panel: full details + status dropdown (Reported → Being Handled → Resolved) + warden notes
+- 2 seed stray reports (Injured dog, Hungry cat)
+- Backend: GET/POST /api/stray, PATCH /api/stray/{id}/status
+
+
 ### P0 (Critical — blocked without these)
 - Real Google OAuth: Users need actual @vitstudent.ac.in / @vit.ac.in accounts
 
