@@ -36,7 +36,7 @@ const Login = () => {
       {/* Left Hero */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <img
-          src="https://static.prod-images.emergentagent.com/jobs/b020ce0e-a845-4de3-acc3-d1197e209893/images/441252e19261929df90c04953d545f50353b12c5ec3d77f9f401b0278a34cf03.png"
+          src="https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&q=80"
           alt="VIT Hostel Campus"
           className="absolute inset-0 w-full h-full object-cover"
         />
