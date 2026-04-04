@@ -135,6 +135,11 @@ def require_warden(current_user=Depends(get_current_user)):
 
 # ─── Auth Routes ─────────────────────────────────────────────────────────────
 
+@api_router.get("/")
+async def root():
+    return {"status": "ok", "app": "HostelHub", "version": "1.0.0"}
+
+
 @api_router.post("/auth/google")
 async def google_auth(body: GoogleAuthRequest):
     try:
