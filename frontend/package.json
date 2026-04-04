@@ -58,7 +58,11 @@
     "zod": "^3.24.4"
   },
   "overrides": {
-     "ajv": "^8.0.0"
+     "ajv": "^8.0.0",
+     "fork-ts-checker-webpack-plugin": {
+       "ajv": "^6.12.6",
+       "ajv-keywords": "^3.5.2"
+     }
    },
   "scripts": {
     "start": "craco start",
