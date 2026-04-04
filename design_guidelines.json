@@ -1,0 +1,124 @@
+{
+  "theme": {
+    "archetype": "Archetype 3 (Pastel & Soft) mixed with Soft Utility",
+    "mode": "light",
+    "supports_dark_mode": true
+  },
+  "colors": {
+    "light": {
+      "background": "#FFFFFF",
+      "surface": "#F4F7F5",
+      "primary": "#1D9E75",
+      "primary_hover": "#15825E",
+      "text_main": "#0D1F1A",
+      "text_muted": "#5C736A",
+      "border": "#E2E8E5",
+      "error": "#E63946",
+      "warning": "#F4A261"
+    },
+    "dark": {
+      "background": "#1a1a2e",
+      "surface": "#23233E",
+      "primary": "#1D9E75",
+      "primary_hover": "#25B88B",
+      "text_main": "#F8F8F9",
+      "text_muted": "#A1A1B5",
+      "border": "#313155",
+      "error": "#FF4D4D",
+      "warning": "#FFB347"
+    }
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Outfit, sans-serif",
+      "weights": ["400", "600", "800"],
+      "h1": "text-4xl sm:text-5xl tracking-tight font-extrabold",
+      "h2": "text-2xl sm:text-3xl tracking-tight font-bold",
+      "h3": "text-xl sm:text-2xl font-semibold",
+      "h4": "text-lg font-semibold"
+    },
+    "body": {
+      "font_family": "DM Sans, sans-serif",
+      "weights": ["400", "500", "700"],
+      "p": "text-base leading-relaxed",
+      "small": "text-sm text-muted",
+      "overline": "text-xs tracking-[0.2em] uppercase font-bold"
+    }
+  },
+  "layout": {
+    "spacing_scale": "Generous spacing. Use p-6, p-8, p-12. Avoid cramped p-2/p-4 unless deep inside widgets.",
+    "container_padding": "px-6 md:px-12 lg:px-24",
+    "dashboard_grid": "Use BENTO GRID (Control Room Mode). grid-cols-1 md:grid-cols-3 lg:grid-cols-4. gap-4 or gap-6.",
+    "border_radius": "rounded-2xl for main cards, rounded-xl for inner elements. Subtly rounded, no sharp edges."
+  },
+  "surfaces": {
+    "dashboard_cards": "Flat background, 1px subtle border (border-border), no massive shadows. On hover: slight lift (-translate-y-1) and shadow-lg.",
+    "glassmorphism": "Use for top nav and floating elements: backdrop-blur-xl bg-white/80 (light) or bg-[#1a1a2e]/80 (dark). 1px inner stroke.",
+    "neumorphism": "Avoid heavy 3D neumorphism. Use 'Tactile' variants for step trackers: soft inner shadows and sharp 1px borders."
+  },
+  "components_strategy": {
+    "forms": "Use React Hook Form + Shadcn UI. Inputs must have clear focus states: focus:ring-2 focus:ring-[#1D9E75]/50 focus:border-[#1D9E75].",
+    "buttons": "Primary button uses bg-[#1D9E75] text-white. MUST have hover state explicitly defined.",
+    "navigation": "Top Nav Bar required on all pages. Mobile: Bottom navigation bar fixed at bottom (hidden on desktop).",
+    "dark_mode_toggle": "Sun/Moon icon top right corner, saves to localStorage.",
+    "toast": "Use Sonner for toast notifications. Clean, bottom-right positioning.",
+    "loaders": "Replace generic spinners with pulsing icons or elegant skeleton loaders using rounded-xl.",
+    "analytics": "Recharts for Warden Dashboard. Use the 'dark' or 'light' palette colors for the data series. Primary line: #1D9E75."
+  },
+  "motion": {
+    "hover": "All interactive elements must have transition: transform 0.2s ease, opacity 0.2s ease.",
+    "click": "Scale down slightly on active: scale-95.",
+    "lists": "Staggered entrance animations using Framer Motion.",
+    "emoji_ratings": "Framer Motion scaling emojis (scale up to 1.5x on hover/click)."
+  },
+  "accessibility": {
+    "contrast": "Ensure text over colored backgrounds meets 4.5:1 ratio. Green #1D9E75 needs white text.",
+    "testing": "All interactive elements MUST include data-testid attribute (e.g., data-testid='login-button', data-testid='theme-toggle').",
+    "focus": "Clear focus rings on all keyboard navigation."
+  },
+  "assets": {
+    "icons": "lucide-react",
+    "fonts": ["Outfit", "DM Sans"]
+  },
+  "media": {
+    "login_hero": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/b020ce0e-a845-4de3-acc3-d1197e209893/images/441252e19261929df90c04953d545f50353b12c5ec3d77f9f401b0278a34cf03.png",
+      "description": "Architectural photography of a modern, aesthetic student housing campus at golden hour. Used for the Login Page hero side."
+    },
+    "lost_items": [
+      {
+        "url": "https://images.unsplash.com/photo-1711843250662-2a688ef2c114?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwzfHxsb3N0JTIwaXRlbXMlMjBoZWFkcGhvbmVzJTIwa2V5cyUyMG5vdGVib29rfGVufDB8fHx8MTc3NTI5NTc3NHww&ixlib=rb-4.1.0&q=85",
+        "description": "A book, headphones, and pen on a table. Placeholder for Lost & Found grid."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1428223501723-d821c5d00ca3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHw0fHxsb3N0JTIwaXRlbXMlMjBoZWFkcGhvbmVzJTIwa2V5cyUyMG5vdGVib29rfGVufDB8fHx8MTc3NTI5NTc3NHww&ixlib=rb-4.1.0&q=85",
+        "description": "Black corded headphones, silver MacBook. Placeholder for Lost & Found grid."
+      }
+    ],
+    "mess_food": [
+      {
+        "url": "https://images.unsplash.com/photo-1542367592-8849eb950fd8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHw0fHxpbmRpYW4lMjBmb29kJTIwdHJheXxlbnwwfHx8fDE3NzUyOTU3ODR8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Flatbread beside steam rice and stew meat platter. Placeholder for Mess Menu previews."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1711153419402-336ee48f2138?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwyfHxpbmRpYW4lMjBmb29kJTIwdHJheXxlbnwwfHx8fDE3NzUyOTU3ODR8MA&ixlib=rb-4.1.0&q=85",
+        "description": "A metal tray topped with different types of food. Placeholder for Mess Menu previews."
+      }
+    ],
+    "student_avatar": {
+      "url": "https://images.unsplash.com/photo-1709811240710-cff5f04deb44?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzl8MHwxfHNlYXJjaHwxfHxjb2xsZWdlJTIwZmVtYWxlJTIwc3R1ZGVudCUyMHBvcnRyYWl0fGVufDB8fHx8MTc3NTI5NTc4NHww&ixlib=rb-4.1.0&q=85",
+      "description": "Profile picture of a female student for the dashboard."
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly adhere to the color palette provided in light and dark mode.",
+    "Use the Bento Grid mode for the Home Dashboard. Avoid repetitive equal-sized square cards.",
+    "Implement the Multi-step form for Maintenance Reporter with clear, tactile visual trackers.",
+    "Add Recharts in the Warden Dashboard. Make sure charts use appropriate text colors based on the current theme.",
+    "Ensure 'data-testid' is attached to EVERY interactive element (buttons, tabs, inputs, links).",
+    "Include a smooth toggle for Dark/Light mode in the top right.",
+    "Ensure Mobile-First approach: Use bottom navigation purely for mobile screens and hide it on desktop.",
+    "Use Framer Motion for emoji meal ratings in the Mess section to make them pop when interacted with.",
+    "Use the specific media URLs provided for placeholders. Do not use random placeholder services."
+  ]
+}
