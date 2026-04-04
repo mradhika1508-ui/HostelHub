@@ -81,3 +81,125 @@ def test_lost_found_with_student_jwt():
     token = make_student_token()
     r = requests.get(f"{BASE_URL}/api/lost-found", headers={"Authorization": f"Bearer {token}"})
     assert r.status_code == 200
+
+
+# ─── Visitor Management Tests ─────────────────────────────────────────────────
+
+def test_visitors_no_auth():
+    r = requests.get(f"{BASE_URL}/api/visitors")
+    assert r.status_code == 401
+
+def test_get_visitors_seeded():
+    """GET /api/visitors should return 3 seeded visitor records"""
+    # Seed first
+    requests.post(f"{BASE_URL}/api/seed")
+    token = make_warden_token()
+    r = requests.get(f"{BASE_URL}/api/visitors", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200
+    data = r.json()
+    assert isinstance(data, list)
+    assert len(data) >= 3, f"Expected >= 3 visitors, got {len(data)}"
+    print(f"Visitor records: {len(data)}")
+
+def test_create_visitor_request():
+    """POST /api/visitors creates a new visitor request with status=pending"""
+    token = make_student_token()
+    payload = {
+        "visitor_name": "TEST_VisitorMom",
+        "visitor_phone": "9876543210",
+        "relationship": "Parent",
+        "visit_date": "2026-03-15",
+        "visit_time": "14:00",
+        "purpose": "Family visit"
+    }
+    r = requests.post(f"{BASE_URL}/api/visitors", json=payload, headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200
+    data = r.json()
+    assert data["status"] == "pending"
+    assert data["visitor_name"] == "TEST_VisitorMom"
+    assert "id" in data
+    assert "ticket_number" in data
+    print(f"Created visitor request: {data['id']} status={data['status']}")
+    return data["id"]
+
+def test_update_visitor_status_approve():
+    """PATCH /api/visitors/{id}/status updates status to approved"""
+    # Create a visitor first
+    student_token = make_student_token()
+    payload = {
+        "visitor_name": "TEST_ApproveVisitor",
+        "visitor_phone": "9999999999",
+        "relationship": "Sibling",
+        "visit_date": "2026-03-20",
+        "visit_time": "10:00",
+        "purpose": "Document pickup"
+    }
+    create_r = requests.post(f"{BASE_URL}/api/visitors", json=payload, headers={"Authorization": f"Bearer {student_token}"})
+    assert create_r.status_code == 200
+    visit_id = create_r.json()["id"]
+
+    # Approve it as warden
+    warden_token = make_warden_token()
+    patch_r = requests.patch(
+        f"{BASE_URL}/api/visitors/{visit_id}/status",
+        json={"status": "approved", "warden_notes": "Approved for 2PM visit"},
+        headers={"Authorization": f"Bearer {warden_token}"}
+    )
+    assert patch_r.status_code == 200
+    print(f"Approved visitor request {visit_id}")
+
+def test_update_visitor_status_reject():
+    """PATCH /api/visitors/{id}/status updates status to rejected"""
+    student_token = make_student_token()
+    payload = {
+        "visitor_name": "TEST_RejectVisitor",
+        "visitor_phone": "8888888888",
+        "relationship": "Friend",
+        "visit_date": "2026-03-21",
+        "visit_time": "11:00",
+        "purpose": "General visit"
+    }
+    create_r = requests.post(f"{BASE_URL}/api/visitors", json=payload, headers={"Authorization": f"Bearer {student_token}"})
+    assert create_r.status_code == 200
+    visit_id = create_r.json()["id"]
+
+    warden_token = make_warden_token()
+    patch_r = requests.patch(
+        f"{BASE_URL}/api/visitors/{visit_id}/status",
+        json={"status": "rejected", "warden_notes": "Not allowed during exams"},
+        headers={"Authorization": f"Bearer {warden_token}"}
+    )
+    assert patch_r.status_code == 200
+    print(f"Rejected visitor request {visit_id}")
+
+def test_update_visitor_status_not_warden():
+    """Student cannot update visitor status"""
+    student_token = make_student_token()
+    payload = {
+        "visitor_name": "TEST_StudentPatch",
+        "visitor_phone": "7777777777",
+        "relationship": "Other",
+        "visit_date": "2026-03-22",
+        "visit_time": "12:00",
+        "purpose": "Test"
+    }
+    create_r = requests.post(f"{BASE_URL}/api/visitors", json=payload, headers={"Authorization": f"Bearer {student_token}"})
+    visit_id = create_r.json()["id"]
+
+    patch_r = requests.patch(
+        f"{BASE_URL}/api/visitors/{visit_id}/status",
+        json={"status": "approved", "warden_notes": ""},
+        headers={"Authorization": f"Bearer {student_token}"}
+    )
+    assert patch_r.status_code in [401, 403]
+    print(f"Student patch blocked: {patch_r.status_code}")
+
+def test_get_visitors_student_filtered():
+    """Student only sees their own visitor requests"""
+    token = make_student_token()
+    r = requests.get(f"{BASE_URL}/api/visitors", headers={"Authorization": f"Bearer {token}"})
+    assert r.status_code == 200
+    data = r.json()
+    for v in data:
+        assert v.get("student_id") == "student1", f"Got visitor for another student: {v.get('student_id')}"
+    print(f"Student sees {len(data)} visitor requests (all own)")

@@ -6,7 +6,8 @@ import { timeAgo } from "../../utils/timeAgo";
 import { toast } from "sonner";
 import {
   Wrench, Search, UtensilsCrossed, AlertCircle, TrendingUp,
-  X, ChevronRight, Check, BarChart2, Star, Package, PawPrint, MapPin, Clock
+  X, ChevronRight, Check, BarChart2, Star, Package, PawPrint, MapPin, Clock,
+  Users, UserCheck, UserX
 } from "lucide-react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -590,6 +591,12 @@ const ISSUE_TYPE_EMOJI = {
   "Pregnant": "🐾", "Sick": "🤒", "Lost": "🔍", "Other": "📋",
 };
 
+const VISITOR_STATUS_STYLES = {
+  pending: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+  approved: "bg-[#1D9E75]/10 text-[#1D9E75]",
+  rejected: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+};
+
 const StrayAnimalsTab = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -705,14 +712,151 @@ const StrayAnimalsTab = () => {
   );
 };
 
+const VisitorsTab = () => {
+  const [visits, setVisits] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
+  const [notes, setNotes] = useState("");
+  const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    api.get("/visitors").then((r) => setVisits(r.data)).finally(() => setLoading(false));
+  }, []);
+
+  const updateStatus = async (id, status) => {
+    try {
+      await api.patch(`/visitors/${id}/status`, { status, warden_notes: notes });
+      setVisits((vs) => vs.map((v) => v.id === id ? { ...v, status, warden_notes: notes } : v));
+      setSelected((s) => s ? { ...s, status, warden_notes: notes } : null);
+      toast.success(status === "approved" ? "Visitor approved!" : "Visitor request rejected");
+    } catch { toast.error("Failed to update"); }
+  };
+
+  const filtered = visits.filter((v) => !filter || v.status === filter);
+
+  return (
+    <div className="flex gap-6">
+      <div className={`flex-1 min-w-0 ${selected ? "hidden lg:block" : ""}`}>
+        {/* Filter buttons */}
+        <div className="flex flex-wrap gap-2 mb-4 items-center">
+          {[["", "All"], ["pending", "Pending"], ["approved", "Approved"], ["rejected", "Rejected"]].map(([val, label]) => (
+            <button key={val} onClick={() => setFilter(val)}
+              data-testid={`visitor-filter-${val || "all"}`}
+              className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
+                filter === val
+                  ? "bg-[#1D9E75] text-white"
+                  : "bg-white dark:bg-[#23233E] text-gray-600 dark:text-gray-400 border border-gray-100 dark:border-[#313155]"
+              }`}>{label}</button>
+          ))}
+          <span className="ml-auto text-xs text-gray-400 self-center">
+            {visits.filter((v) => v.status === "pending").length} pending
+          </span>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-16"><div className="w-6 h-6 border-2 border-[#1D9E75] border-t-transparent rounded-full animate-spin" /></div>
+        ) : (
+          <div className="bg-white dark:bg-[#23233E] rounded-2xl border border-gray-100 dark:border-[#313155] overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 dark:bg-[#1a1a2e]/50">
+                <tr>
+                  {["Ticket", "Student", "Visitor", "Relationship", "Date & Time", "Status"].map((h) => (
+                    <th key={h} className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50 dark:divide-[#313155]">
+                {filtered.map((v) => (
+                  <tr key={v.id} data-testid={`warden-visitor-${v.id}`}
+                    onClick={() => { setSelected(v); setNotes(v.warden_notes || ""); }}
+                    className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-[#1a1a2e]/50 transition-colors ${selected?.id === v.id ? "bg-[#1D9E75]/5" : ""}`}>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-400">{v.ticket_number}</td>
+                    <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                      {v.student_name}
+                      <span className="block text-xs text-gray-400 font-normal">Room {v.room_number} · F{v.floor_number}</span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{v.visitor_name}</td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{v.relationship}</td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">{v.visit_date} · {v.visit_time}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${VISITOR_STATUS_STYLES[v.status]}`}>
+                        {v.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {filtered.length === 0 && (
+              <div className="text-center py-12 text-gray-400">
+                <Users className="w-8 h-8 mx-auto mb-2 opacity-20" />
+                <p>No visitor requests found</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Side panel */}
+      {selected && (
+        <div className="w-full lg:w-96 bg-white dark:bg-[#23233E] rounded-2xl border border-gray-100 dark:border-[#313155] p-5 flex-shrink-0 max-h-[calc(100vh-200px)] overflow-y-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-gray-900 dark:text-white font-[Outfit]">Visitor Request</h3>
+            <button onClick={() => setSelected(null)}><X className="w-5 h-5 text-gray-400" /></button>
+          </div>
+          <div className="space-y-3 text-sm">
+            <div><p className="text-gray-400 text-xs">Ticket</p><p className="font-mono font-bold text-[#1D9E75]">{selected.ticket_number}</p></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><p className="text-gray-400 text-xs">Student</p><p className="font-medium dark:text-white">{selected.student_name}</p></div>
+              <div><p className="text-gray-400 text-xs">Room</p><p className="font-medium dark:text-white">{selected.room_number} / Floor {selected.floor_number}</p></div>
+            </div>
+            <div className="p-3 bg-gray-50 dark:bg-[#1a1a2e]/50 rounded-xl space-y-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div><p className="text-gray-400 text-xs">Visitor Name</p><p className="font-semibold dark:text-white">{selected.visitor_name}</p></div>
+                <div><p className="text-gray-400 text-xs">Relationship</p><p className="font-medium dark:text-white">{selected.relationship}</p></div>
+              </div>
+              <div><p className="text-gray-400 text-xs">Phone</p><p className="font-medium dark:text-white">{selected.visitor_phone}</p></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><p className="text-gray-400 text-xs">Visit Date</p><p className="font-medium dark:text-white">{selected.visit_date}</p></div>
+                <div><p className="text-gray-400 text-xs">Time</p><p className="font-medium dark:text-white">{selected.visit_time}</p></div>
+              </div>
+              <div><p className="text-gray-400 text-xs">Purpose</p><p className="dark:text-gray-300 leading-relaxed">{selected.purpose}</p></div>
+            </div>
+            <div>
+              <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Warden Notes (optional)</label>
+              <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)}
+                data-testid="visitor-warden-notes"
+                placeholder="e.g. Approved. Visitor to check in at gate..."
+                className="w-full px-3 py-2 border border-gray-200 dark:border-[#313155] rounded-xl bg-white dark:bg-[#1a1a2e]/50 text-gray-900 dark:text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1D9E75]/50" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <button data-testid="approve-visitor-btn"
+                onClick={() => updateStatus(selected.id, "approved")}
+                className="py-2.5 bg-[#1D9E75] text-white rounded-xl text-sm font-semibold hover:bg-[#15825E] transition-colors flex items-center justify-center gap-1.5">
+                <UserCheck className="w-4 h-4" /> Approve
+              </button>
+              <button data-testid="reject-visitor-btn"
+                onClick={() => updateStatus(selected.id, "rejected")}
+                className="py-2.5 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors flex items-center justify-center gap-1.5">
+                <UserX className="w-4 h-4" /> Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const TABS = [
   { id: "overview", label: "Overview", icon: BarChart2 },
   { id: "maintenance", label: "Maintenance", icon: Wrench },
   { id: "lostfound", label: "Lost & Found", icon: Search },
   { id: "mess", label: "Mess", icon: UtensilsCrossed },
-  { id: "issues", label: "Other Issues", icon: AlertCircle },
   { id: "stray", label: "Stray Animals", icon: PawPrint },
+  { id: "visitors", label: "Visitors", icon: Users },
   { id: "analytics", label: "Analytics", icon: TrendingUp },
+  { id: "issues", label: "Other Issues", icon: AlertCircle },
 ];
 
 const WardenDashboard = () => {
@@ -754,9 +898,10 @@ const WardenDashboard = () => {
       {activeTab === "maintenance" && <MaintenanceTab />}
       {activeTab === "lostfound" && <LostFoundTab />}
       {activeTab === "mess" && <MessTab />}
-      {activeTab === "issues" && <OtherIssuesTab />}
       {activeTab === "stray" && <StrayAnimalsTab />}
+      {activeTab === "visitors" && <VisitorsTab />}
       {activeTab === "analytics" && <AnalyticsTab />}
+      {activeTab === "issues" && <OtherIssuesTab />}
     </Layout>
   );
 };

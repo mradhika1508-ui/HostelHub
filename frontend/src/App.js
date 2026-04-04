@@ -11,6 +11,7 @@ import MessCorner from "./pages/student/MessCorner";
 import OtherIssues from "./pages/student/OtherIssues";
 import WardenDashboard from "./pages/warden/WardenDashboard";
 import StrayAnimals from "./pages/student/StrayAnimals";
+import VisitorManagement from "./pages/student/VisitorManagement";
 import "./App.css";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -33,6 +34,7 @@ function AppRoutes() {
       <Route path="/mess" element={<ProtectedRoute requiredRole="student"><MessCorner /></ProtectedRoute>} />
       <Route path="/issues" element={<ProtectedRoute requiredRole="student"><OtherIssues /></ProtectedRoute>} />
       <Route path="/stray" element={<ProtectedRoute requiredRole="student"><StrayAnimals /></ProtectedRoute>} />
+      <Route path="/visitors" element={<ProtectedRoute requiredRole="student"><VisitorManagement /></ProtectedRoute>} />
       <Route path="/warden" element={<ProtectedRoute requiredRole="warden"><WardenDashboard /></ProtectedRoute>} />
       <Route path="/" element={
         token

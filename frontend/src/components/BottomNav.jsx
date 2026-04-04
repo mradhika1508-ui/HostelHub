@@ -1,13 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Wrench, Search, UtensilsCrossed, AlertCircle, PawPrint } from "lucide-react";
+import { Home, Wrench, Search, UtensilsCrossed, AlertCircle, PawPrint, Users } from "lucide-react";
 
 const links = [
   { to: "/dashboard", icon: Home, label: "Home" },
   { to: "/maintenance", icon: Wrench, label: "Repair" },
   { to: "/lost-found", icon: Search, label: "Lost" },
   { to: "/mess", icon: UtensilsCrossed, label: "Mess" },
-  { to: "/issues", icon: AlertCircle, label: "Issues" },
   { to: "/stray", icon: PawPrint, label: "Stray" },
+  { to: "/visitors", icon: Users, label: "Visitors" },
+  { to: "/issues", icon: AlertCircle, label: "Issues" },
 ];
 
 const BottomNav = () => {

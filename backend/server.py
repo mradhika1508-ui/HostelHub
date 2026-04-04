@@ -104,6 +104,18 @@ class CreateIssueRequest(BaseModel):
     urgency: str
     anonymous: bool = True
 
+class CreateVisitorRequest(BaseModel):
+    visitor_name: str
+    visitor_phone: str
+    relationship: str  # Parent, Sibling, Friend, Guardian, Other
+    visit_date: str    # YYYY-MM-DD
+    visit_time: str    # HH:MM
+    purpose: str       # max 100 chars
+
+class UpdateVisitorStatusRequest(BaseModel):
+    status: str        # pending, approved, rejected
+    warden_notes: Optional[str] = ""
+
 class CreateStrayReportRequest(BaseModel):
     issue_type: str  # Injured, Aggressive, Hungry or Malnourished, Pregnant, Sick, Lost, Other
     description: str = ""
@@ -377,6 +389,39 @@ async def update_issue_status(issue_id: str, req: UpdateStatusRequest, current_u
     return {"message": "Updated"}
 
 
+# ─── Visitor Management ───────────────────────────────────────────────────────
+
+@api_router.get("/visitors")
+async def get_visitors(current_user=Depends(get_current_user)):
+    query = {} if current_user["role"] == "warden" else {"student_id": current_user["id"]}
+    return await db.visitors.find(query, {"_id": 0}).sort("created_at", -1).to_list(200)
+
+@api_router.post("/visitors")
+async def create_visitor(req: CreateVisitorRequest, current_user=Depends(get_current_user)):
+    visit = {
+        "id": gen_id(), "ticket_number": gen_ticket_num("VISIT"),
+        "student_id": current_user["id"], "student_name": current_user["name"],
+        "floor_number": current_user.get("floor_number", ""),
+        "room_number": current_user.get("room_number", ""),
+        "visitor_name": req.visitor_name, "visitor_phone": req.visitor_phone,
+        "relationship": req.relationship, "visit_date": req.visit_date,
+        "visit_time": req.visit_time, "purpose": req.purpose[:100],
+        "status": "pending", "warden_notes": "", "created_at": now_iso()
+    }
+    await db.visitors.insert_one({**visit, "_id": visit["id"]})
+    return visit
+
+@api_router.patch("/visitors/{visit_id}/status")
+async def update_visitor_status(visit_id: str, req: UpdateVisitorStatusRequest, current_user=Depends(require_warden)):
+    result = await db.visitors.update_one(
+        {"id": visit_id},
+        {"$set": {"status": req.status, "warden_notes": req.warden_notes}}
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Visitor request not found")
+    return {"message": "Updated"}
+
+
 # ─── Stray Animal Reports ─────────────────────────────────────────────────────
 
 @api_router.get("/stray")
@@ -497,7 +542,7 @@ async def get_analytics(current_user=Depends(require_warden)):
 
 @api_router.post("/seed")
 async def seed():
-    for col in ["users", "maintenance", "lost_found", "mess_menu", "mess_ratings", "mess_complaints", "other_issues", "stray_reports"]:
+    for col in ["users", "maintenance", "lost_found", "mess_menu", "mess_ratings", "mess_complaints", "other_issues", "stray_reports", "visitors"]:
         await db[col].delete_many({})
 
     users = [
@@ -682,11 +727,34 @@ async def seed():
     for sr in stray_reports:
         await db.stray_reports.insert_one({**sr, "_id": sr["id"]})
 
+    visitors_data = [
+        {"id": "v1", "ticket_number": "VISIT-202502-A1B2", "student_id": "student1",
+         "student_name": "Priya Sharma", "floor_number": "2", "room_number": "204",
+         "visitor_name": "Sudha Sharma", "visitor_phone": "9876543210", "relationship": "Parent",
+         "visit_date": (today_dt + timedelta(days=2)).strftime('%Y-%m-%d'), "visit_time": "11:00",
+         "purpose": "Parent visit to discuss academics and health check",
+         "status": "approved", "warden_notes": "Approved. Please sign in at gate with ID proof.", "created_at": days_ago_iso(1)},
+        {"id": "v2", "ticket_number": "VISIT-202502-C3D4", "student_id": "student2",
+         "student_name": "Ananya Rao", "floor_number": "3", "room_number": "312",
+         "visitor_name": "Rekha Rao", "visitor_phone": "9845012345", "relationship": "Sibling",
+         "visit_date": (today_dt + timedelta(days=3)).strftime('%Y-%m-%d'), "visit_time": "14:00",
+         "purpose": "Sister visiting to hand over important documents",
+         "status": "pending", "warden_notes": "", "created_at": days_ago_iso(hours=3)},
+        {"id": "v3", "ticket_number": "VISIT-202502-E5F6", "student_id": "student3",
+         "student_name": "Meera Singh", "floor_number": "1", "room_number": "108",
+         "visitor_name": "Kavya Nair", "visitor_phone": "9988776655", "relationship": "Friend",
+         "visit_date": (today_dt + timedelta(days=1)).strftime('%Y-%m-%d'), "visit_time": "16:30",
+         "purpose": "Friend from college visiting for a project discussion",
+         "status": "rejected", "warden_notes": "Visitor passes not allowed on weekdays for non-family members.", "created_at": days_ago_iso(2)},
+    ]
+    for v in visitors_data:
+        await db.visitors.insert_one({**v, "_id": v["id"]})
+
     return {"message": "Database seeded successfully",
             "counts": {"users": 4, "maintenance": len(maintenance), "lost_found": len(lost_found),
                        "mess_menus": len(menus_data), "mess_ratings": len(ratings_seed),
                        "mess_complaints": len(complaints), "other_issues": len(issues),
-                       "stray_reports": len(stray_reports)}}
+                       "stray_reports": len(stray_reports), "visitors": len(visitors_data)}}
 
 
 # ─── App Setup ────────────────────────────────────────────────────────────────

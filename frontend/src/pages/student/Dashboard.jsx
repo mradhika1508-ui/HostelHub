@@ -5,7 +5,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import api from "../../api/axios";
 import { timeAgo } from "../../utils/timeAgo";
 import { StatusBadge } from "../../components/StatusTracker";
-import { Wrench, Search, UtensilsCrossed, AlertCircle, ArrowRight, TrendingUp, PawPrint } from "lucide-react";
+import { Wrench, Search, UtensilsCrossed, AlertCircle, ArrowRight, TrendingUp, PawPrint, Users } from "lucide-react";
 
 const CircularRing = ({ value }) => {
   const radius = 40;
@@ -30,8 +30,9 @@ const QUICK_ACTIONS = [
   { label: "Report Maintenance", icon: Wrench, to: "/maintenance", color: "bg-orange-50 dark:bg-orange-900/20 text-orange-500", desc: "Plumbing, electrical, furniture" },
   { label: "Lost & Found", icon: Search, to: "/lost-found", color: "bg-blue-50 dark:bg-blue-900/20 text-blue-500", desc: "Post or find lost items" },
   { label: "Mess Corner", icon: UtensilsCrossed, to: "/mess", color: "bg-[#1D9E75]/10 text-[#1D9E75]", desc: "Menu, ratings & complaints" },
-  { label: "Other Issues", icon: AlertCircle, to: "/issues", color: "bg-purple-50 dark:bg-purple-900/20 text-purple-500", desc: "WiFi, noise, safety concerns" },
   { label: "Stray Animals", icon: PawPrint, to: "/stray", color: "bg-amber-50 dark:bg-amber-900/20 text-amber-500", desc: "Report animal welfare concerns" },
+  { label: "Visitor Requests", icon: Users, to: "/visitors", color: "bg-teal-50 dark:bg-teal-900/20 text-teal-500", desc: "Register & track visitor passes" },
+  { label: "Other Issues", icon: AlertCircle, to: "/issues", color: "bg-purple-50 dark:bg-purple-900/20 text-purple-500", desc: "WiFi, noise, safety concerns" },
 ];
 
 const MEAL_ICONS = { breakfast: "🍳", lunch: "🍛", snacks: "🫖", dinner: "🌙" };
@@ -91,7 +92,7 @@ const Dashboard = () => {
         {/* Quick Actions */}
         <div className="lg:col-span-3">
           <h2 className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-3 font-[Outfit]">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {QUICK_ACTIONS.map(({ label, icon: Icon, to, color, desc }) => (
               <button
                 key={to}
