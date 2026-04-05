@@ -4,7 +4,6 @@ import api from "../../api/axios";
 import { timeAgo } from "../../utils/timeAgo";
 import { toast } from "sonner";
 import { Star, TrendingUp, AlertTriangle, Plus, X } from "lucide-react";
-
 const MEAL_ICONS = { breakfast: "🍳", lunch: "🍛", snacks: "🫖", dinner: "🌙" };
 const MEALS = ["breakfast", "lunch", "snacks", "dinner"];
 const NEGATIVE_REASONS = ["Too spicy", "Not fresh", "Less quantity", "Tasteless", "Other"];
