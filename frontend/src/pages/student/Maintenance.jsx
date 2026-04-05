@@ -10,7 +10,6 @@ import {
   Wrench, Droplets, Zap, Wifi, Lock, Wind, Sparkles, Bath, Square,
   ImagePlus, CheckCircle, AlertCircle, Clock, ChevronRight, Plus
 } from "lucide-react";
-
 const CATEGORIES = [
   { name: "Bathroom", icon: Bath, color: "bg-blue-50 dark:bg-blue-900/20 text-blue-500" },
   { name: "Water", icon: Droplets, color: "bg-cyan-50 dark:bg-cyan-900/20 text-cyan-500" },
