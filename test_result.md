@@ -232,6 +232,7 @@ test_plan:
   test_all: false
   test_priority: "high_first"
 
+
 agent_communication:
   - agent: "main"
     message: "Fixed the ticket creation issue. The problem was a double /api prefix in the axios baseURL configuration. The REACT_APP_BACKEND_URL env variable already includes '/api' at the end, so we shouldn't add it again in axios.create(). Please test the maintenance ticket creation endpoint and other ticket endpoints (mess complaints, issues, visitors, stray reports) to verify they're working correctly."
