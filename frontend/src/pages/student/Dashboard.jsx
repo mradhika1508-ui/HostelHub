@@ -6,7 +6,6 @@ import api from "../../api/axios";
 import { timeAgo } from "../../utils/timeAgo";
 import { StatusBadge } from "../../components/StatusTracker";
 import { Wrench, Search, UtensilsCrossed, AlertCircle, ArrowRight, TrendingUp, PawPrint, Users } from "lucide-react";
-
 const CircularRing = ({ value }) => {
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
