@@ -9,7 +9,6 @@ import {
   Wifi, Volume2, Lightbulb, Wind, UserX, Shield, Tv, Thermometer, Users, HelpCircle,
   AlertCircle, Clock, Check, ChevronRight, Plus, ImagePlus
 } from "lucide-react";
-
 const CATEGORIES = [
   { name: "Room problem", icon: HelpCircle, color: "bg-orange-50 dark:bg-orange-900/20 text-orange-500" },
   { name: "WiFi issue", icon: Wifi, color: "bg-purple-50 dark:bg-purple-900/20 text-purple-500" },
