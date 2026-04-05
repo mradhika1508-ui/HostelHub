@@ -10,7 +10,6 @@ export const timeAgo = (dateStr) => {
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
 };
-
 export const formatDate = (dateStr) => {
   if (!dateStr) return "";
   return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
