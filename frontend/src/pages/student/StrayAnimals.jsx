@@ -6,7 +6,6 @@ import { timeAgo } from "../../utils/timeAgo";
 import { StatusBadge } from "../../components/StatusTracker";
 import { toast } from "sonner";
 import { Camera, MapPin, Clock, PawPrint, AlertTriangle, Plus, ChevronRight, Check } from "lucide-react";
-
 const ISSUE_TYPES = [
   { value: "Injured", emoji: "🩹", color: "border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600" },
   { value: "Aggressive", emoji: "⚠️", color: "border-orange-400 bg-orange-50 dark:bg-orange-900/20 text-orange-600" },
