@@ -3,7 +3,6 @@ import Layout from "../../components/Layout";
 import api from "../../api/axios";
 import { toast } from "sonner";
 import { Users, Clock, CheckCircle, XCircle, Plus, X } from "lucide-react";
-
 const RELATIONSHIPS = ["Parent", "Sibling", "Friend", "Guardian", "Other"];
 
 const STATUS_STYLES = {
