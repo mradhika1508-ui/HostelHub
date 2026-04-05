@@ -5,7 +5,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import { timeAgo } from "../../utils/timeAgo";
 import { toast } from "sonner";
 import { Search, Plus, Package, MapPin, Clock, X, ImagePlus } from "lucide-react";
-
 const LOCATIONS = ["Mess", "Floor 1", "Floor 2", "Floor 3", "Floor 4", "Bathroom", "Common Room", "Other"];
 
 const LostFound = () => {
