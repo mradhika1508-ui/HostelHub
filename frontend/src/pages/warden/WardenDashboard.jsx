@@ -18,7 +18,7 @@ const STATUSES = ["submitted", "seen", "assigned", "in_progress", "resolved"];
 const STATUS_LABELS = ["Submitted", "Seen", "Assigned", "In Progress", "Resolved"];
 const PIE_COLORS = ["#1D9E75", "#F4A261", "#E63946"];
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── Sub-components ─────────────────────────────────────────────────
 
 const SummaryCard = ({ title, value, icon: Icon, color, sub }) => (
   <div className={`bg-white dark:bg-[#23233E] rounded-2xl border border-gray-100 dark:border-[#313155] p-5`}>
