@@ -6,7 +6,6 @@ import { useTheme } from "../contexts/ThemeContext";
 import api from "../api/axios";
 import { toast } from "sonner";
 import { Sun, Moon, Shield, Star, Clock } from "lucide-react";
-
 const Login = () => {
   const { login } = useAuth();
   const { theme, toggleTheme } = useTheme();
