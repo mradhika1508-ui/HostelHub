@@ -91,6 +91,7 @@ A full-stack hostel management system for VIT Girls' Hostel with Google OAuth re
 - Student floor/room number auto-population from college records
 - Multi-hostel support
 
+
 ## Next Tasks
 1. Add Google Cloud Console authorized origins for production domain
 2. Test with actual VIT Google accounts
